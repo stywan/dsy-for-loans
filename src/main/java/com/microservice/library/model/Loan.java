@@ -3,6 +3,8 @@ package com.microservice.library.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "loans")
 @Data
@@ -13,19 +15,19 @@ public class Loan {
     private Long loanId;
 
     @Column(name = "book_id", nullable = false)
-    private Integer bookId;
+    private Long bookId;
 
     @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    private Long userId;
 
     @Column(name = "loan_date", nullable = false)
-    private int loanDate;
+    private LocalDate loanDate;
 
     @Column(name = "due_date", nullable = false)
-    private int dueDate;
+    private LocalDate dueDate;
 
     @Column(name = "return_date")
-    private int returnDate;
+    private LocalDate returnDate;
 
     public enum LoanStatus {
         A, // Active
