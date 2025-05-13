@@ -114,4 +114,16 @@ public class LoanService {
 
         return mapToResponse(loan, user, book);
     }
+
+    public void checkAndMarkOverdueLoans() {
+        List<Loan> activeLoans = loanRepository.findAll().stream()
+                .filter(loan -> loan.getStatus() == Loan.LoanStatus.A)
+                .filter(loan -> loan.getDueDate().isBefore(LocalDate.now()))
+                .toList();
+
+        for (Loan loan : activeLoans) {
+            loan.setStatus(Loan.LoanStatus.O);
+            loanRepository.save(loan);
+        }
+    }
 }
