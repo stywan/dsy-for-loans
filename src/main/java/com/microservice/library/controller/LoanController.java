@@ -32,9 +32,26 @@ public class LoanController {
         return ResponseEntity.ok(loanService.getAllLoans());
     }
 
+    @PutMapping("/{id}/return")
+    public ResponseEntity<LoanResponseDTO> returnLoan(@PathVariable Long id) {
+        return ResponseEntity.ok(loanService.returnLoan(id));
+    }
+
+    @PutMapping("/{id}/lost")
+    public ResponseEntity<LoanResponseDTO> markAsLost(@PathVariable Long id) {
+        return ResponseEntity.ok(loanService.LoanAsLost(id));
+    }
+
+    @PutMapping("/check-overdue")
+    public ResponseEntity<String> checkOverdueLoans() {
+        loanService.checkAndMarkOverdueLoans();
+        return ResponseEntity.ok("Overdue loans updated");
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLoan(@PathVariable Long id) {
         loanService.deleteLoan(id);
         return ResponseEntity.noContent().build();
     }
+
 }
