@@ -37,6 +37,10 @@ public class LoanController {
         return ResponseEntity.ok(loanService.returnLoan(id));
     }
 
+    @PutMapping("/{id}/lost")
+    public ResponseEntity<LoanResponseDTO> markAsLost(@PathVariable Long id) {
+        return ResponseEntity.ok(loanService.LoanAsLost(id));
+    }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLoan(@PathVariable Long id) {
         loanService.deleteLoan(id);

@@ -94,4 +94,24 @@ public class LoanService {
         BookDTO book = restClientService.getBookById(loan.getBookId());
         return mapToResponse(loan, user, book);
     }
+
+    public LoanResponseDTO LoanAsLost(Long loanId) {
+        Loan loan = loanRepository.findById(loanId)
+                .orElseThrow(() -> new ResourceNotFoundException("Loan not found"));
+
+        if (loan.getStatus() == Loan.LoanStatus.R || loan.getStatus() == Loan.LoanStatus.L) {
+            throw new IllegalStateException("Cannot mark a returned or already lost loan as lost.");
+        }
+
+        loan.setStatus(Loan.LoanStatus.L);
+        loan.setReturnDate(LocalDate.now());
+        loanRepository.save(loan);
+
+        restClientService.updateBookStatus(loan.getBookId(), "L");
+
+        UserDTO user = restClientService.getUserById(loan.getUserId());
+        BookDTO book = restClientService.getBookById(loan.getBookId());
+
+        return mapToResponse(loan, user, book);
+    }
 }
