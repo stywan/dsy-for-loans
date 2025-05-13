@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -116,14 +117,27 @@ public class LoanService {
     }
 
     public void checkAndMarkOverdueLoans() {
-        List<Loan> activeLoans = loanRepository.findAll().stream()
-                .filter(loan -> loan.getStatus() == Loan.LoanStatus.A)
-                .filter(loan -> loan.getDueDate().isBefore(LocalDate.now()))
-                .toList();
+        LocalDate today = LocalDate.now();
 
-        for (Loan loan : activeLoans) {
-            loan.setStatus(Loan.LoanStatus.O);
-            loanRepository.save(loan);
+        List<Loan> allLoans = loanRepository.findAll();
+
+        for (Loan loan : allLoans) {
+            if (loan.getStatus() == Loan.LoanStatus.A &&
+                    loan.getDueDate().isBefore(today)) {
+
+                loan.setStatus(Loan.LoanStatus.O);
+                loanRepository.save(loan);
+            }
+
+            if (loan.getStatus() == Loan.LoanStatus.O &&
+                    ChronoUnit.DAYS.between(loan.getDueDate(), today) > 30) {
+
+                loan.setStatus(Loan.LoanStatus.L);
+                loanRepository.save(loan);
+
+                restClientService.updateBookStatus(loan.getBookId(), "L");
+                restClientService.invalidateUser(loan.getUserId());
+            }
         }
     }
 }

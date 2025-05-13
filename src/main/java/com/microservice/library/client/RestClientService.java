@@ -52,4 +52,14 @@ public class RestClientService {
             throw new IllegalStateException("Failed to update book status: " + e.getMessage());
         }
     }
+
+    public void invalidateUser(Long userId) {
+        String url = "http://localhost:8081/api/users/disable/" + userId;
+
+        try {
+            restTemplate.put(url, null);
+        } catch (RestClientException e) {
+            throw new IllegalStateException("Failed to disable user: " + e.getMessage());
+        }
+    }
 }
