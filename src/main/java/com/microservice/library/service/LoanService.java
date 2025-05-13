@@ -11,6 +11,7 @@ import com.microservice.library.repository.LoanRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -37,7 +38,7 @@ public class LoanService {
         loan.setStatus(Loan.LoanStatus.A);
 
         loan = loanRepository.save(loan);
-        restClientService.markBookAsCheckedOut(dto.getBookId());
+        restClientService.updateBookStatus(dto.getBookId(), "C");
 
         return mapToResponse(loan, user, book);
     }
@@ -73,5 +74,24 @@ public class LoanService {
             throw new ResourceNotFoundException("Loan not found");
         }
         loanRepository.deleteById(id);
+    }
+
+    public LoanResponseDTO returnLoan(Long loanId) {
+        Loan loan = loanRepository.findById(loanId)
+                .orElseThrow(() -> new ResourceNotFoundException("Loan not found"));
+
+        if (!Loan.LoanStatus.A.equals(loan.getStatus())) {
+            throw new IllegalStateException("Only active loans can be returned.");
+        }
+
+        loan.setStatus(Loan.LoanStatus.R);
+        loan.setReturnDate(LocalDate.now());
+        loanRepository.save(loan);
+
+        restClientService.updateBookStatus(loan.getBookId(), "A");
+
+        UserDTO user = restClientService.getUserById(loan.getUserId());
+        BookDTO book = restClientService.getBookById(loan.getBookId());
+        return mapToResponse(loan, user, book);
     }
 }

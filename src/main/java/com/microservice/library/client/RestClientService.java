@@ -35,19 +35,19 @@ public class RestClientService {
             throw new ResourceNotFoundException("Book not found");
         }
     }
-    public void markBookAsCheckedOut(Long bookId) {
+    public void updateBookStatus(Long bookId, String statusCode) {
         String url = "http://localhost:8082/api/books/" + bookId + "/status";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        Map<String, Object> update = new HashMap<>();
-        update.put("status", "C"); // Checked out
+        Map<String, String> body = new HashMap<>();
+        body.put("status", statusCode);
 
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(update, headers);
+        HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
 
         try {
-            restTemplate.exchange(url, HttpMethod.PUT, entity, Void.class);
+            restTemplate.exchange(url, HttpMethod.PUT, request, Void.class);
         } catch (RestClientException e) {
             throw new IllegalStateException("Failed to update book status: " + e.getMessage());
         }
