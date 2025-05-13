@@ -21,8 +21,13 @@ public class LoanService {
     public LoanResponseDTO createLoan(LoanRequestDTO dto) {
 
         UserDTO user = restClientService.getUserById(dto.getUserId());
+        if (!Boolean.TRUE.equals(user.getIs_valid())) {
+            throw new IllegalStateException("User is not valid to request a loan");
+        }
         BookDTO book = restClientService.getBookById(dto.getBookId());
-
+        if (!"A".equalsIgnoreCase(book.getStatus())) {
+            throw new IllegalStateException("Book is not available for loan. Current status: " + book.getStatus());
+        }
 
         Loan loan = new Loan();
         loan.setUserId(dto.getUserId());
@@ -32,6 +37,7 @@ public class LoanService {
         loan.setStatus(Loan.LoanStatus.A);
 
         loan = loanRepository.save(loan);
+        restClientService.markBookAsCheckedOut(dto.getBookId());
 
         return mapToResponse(loan, user, book);
     }
